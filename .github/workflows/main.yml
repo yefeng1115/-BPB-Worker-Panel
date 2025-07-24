@@ -1,0 +1,89 @@
+name: w
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 16 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  j1:
+    runs-on: ubuntu-latest
+    steps:
+      - name: t1
+        uses: actions/checkout@v4
+      - name: t2
+        id: i2
+        run: v1=""; [ -f version.txt ] && v1=$(cat version.txt); echo "v1=$v1" >> $GITHUB_ENV
+      - name: t3
+        id: i3
+        shell: bash # Use bash for more robust scripting
+        run: |
+          u=$(echo "aHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS9yZXBvcy9iaWEtcGFpbi1iYWNoZS9CUEItV29ya2VyLVBhbmVsL3JlbGVhc2Vz" | base64 -d)
+          api_response=""
+          # 1. Fetch API response with retries
+          for i in 1 2 3; do
+            api_response=$(curl -s "$u")
+            if [[ -n "$api_response" ]]; then
+              break
+            fi
+            sleep 5
+          done
+
+          if [[ -z "$api_response" ]]; then
+            echo "::error::Failed to fetch API response after 3 attempts."
+            exit 1
+          fi
+
+          # 2. Validate the response
+          # Check 2a: Is it valid JSON?
+          if ! echo "$api_response" | jq -e . > /dev/null 2>&1; then
+            echo "::error::API response is not valid JSON. Response: $api_response"
+            exit 1
+          fi
+          # Check 2b: Is it an array?
+          if [[ $(echo "$api_response" | jq -r 'type') != "array" ]]; then
+            echo "::error::API response is not a JSON array. Response: $api_response"
+            exit 1
+          fi
+          # Check 2c: Is the array empty?
+          if [[ $(echo "$api_response" | jq 'length') -eq 0 ]]; then
+            echo "::error::API returned an empty release list."
+            exit 1
+          fi
+
+          # 3. Securely extract data
+          v2=$(echo "$api_response" | jq -r '.[0].tag_name')
+          v3=$(echo "$api_response" | jq -r '.[0].assets[] | select(.name == "worker.zip") | .browser_download_url')
+
+          # 4. Final validation of extracted data
+          if [[ -z "$v2" || "$v2" == "null" ]]; then
+            echo "::error::Could not extract tag_name from release."
+            exit 1
+          fi
+          if [[ -z "$v3" || "$v3" == "null" ]]; then
+            echo "::error::Could not extract download_url from release."
+            exit 1
+          fi
+
+          echo "v2=$v2" >> $GITHUB_ENV
+          echo "v3=$v3" >> $GITHUB_ENV
+      - name: t4
+        id: i4
+        run: if [ "${{ env.v1 }}" = "${{ env.v2 }}" ]; then echo "v4=false"; else echo "v4=true"; fi >> $GITHUB_ENV
+      - name: t5
+        if: env.v4 == 'true'
+        run: |
+          wget -O worker.zip "${{ env.v3 }}"
+          unzip -o worker.zip -d .
+          rm worker.zip
+          echo "${{ env.v2 }}" > version.txt
+      - name: t6
+        if: env.v4 == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(bot): Auto-update to version ${{ env.v2 }}"
+          commit_author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+          push_options: --force
