@@ -14,6 +14,6 @@
 | **SUB_PATH**  | 订阅的 URI  |
 | **FALLBACK**  | 后备域 |
 | **DOH_URL**  | 核心 DOH |
-1. 来自大佬分享的PROXYIP：`bpb.yousef.isegaro.com`、`ts.hpc.tw`、`cdn.xn--b6gac.eu.org`、`cdn-all.xn--b6gac.eu.org`、`bestproxy.onecf.eu.org`、`proxyip.cmliussss.net`。
-2. 试问面板：`/panel`，部署成功后，在 url 后面增加/panel来进行访问面板，访问面板修改的密码将会保存在`kv`对里。
-4. IP/域名用回车键`ENTER`分隔。
+1. 来自大佬分享的PROXYIP：bpb.yousef.isegaro.com、ts.hpc.tw、cdn.xn--b6gac.eu.org、cdn-all.xn--b6gac.eu.org、bestproxy.onecf.eu.org、proxyip.cmliussss.net。
+2. 试问面板：/panel，部署成功后，在 url 后面增加/panel来进行访问面板，访问面板修改的密码将会保存在kv里。
+4. IP/域名用回车键ENTER分隔。
