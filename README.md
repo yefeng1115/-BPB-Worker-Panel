@@ -9,13 +9,14 @@
 
 本存储库main主线默认为自动升级为最新版本，Fork后在（Actions行动）中打开名为W的工作流程就可以开启自动更新。
 
-3. 到Cloudflare利用Pages+github搭建。
+2. 到Cloudflare利用Pages+github搭建。
 
 打开 Cloudflare → Workers & Pages → 点击创建 Pages；
 
 选择 GitHub 仓库并连接 BPB 项目；
 
 设置为生产环境构建并部署。
+
 3. 再增加下面必要的变量。
    
 ## 环境变量与说明
